@@ -1,0 +1,35 @@
+---
+- name: Configure repository
+  hosts: all
+  vars:
+          my_package: nmap
+  tasks:
+          - name: Connect to repo
+            yum_repository:
+                    name: exercice122
+                    description: RHCE8 exercice 122 repo
+                    file: exercice122
+                    baseurl: ftp://control.example.com/repo
+                    gpgcheck: no
+          - name: Ensure control node is resolvable
+            lineinfile:
+                    path: /etc/hosts
+                    line: 192.168.56.101 redhatnode control.example.com
+          - name: Install package on Centnode
+            yum:
+                    name: "{{ my_package }}"
+                    state: present
+            when: ansible_facts['distribution'] == "CentOS"
+          - name: Install package on Debian node
+            apt:
+                    name: "{{ my_package }}"
+                    state: present
+                    update_cache: yes
+            when: ansible_facts['distribution'] == "Ubuntu"
+          - name: update package facts
+            package_facts:
+                    manager: auto
+          - name: Show package facts for {{ my_package }}
+            debug:
+                    var: ansible_facts.packages[my_package]
+            when: my_package in ansible_facts.packages

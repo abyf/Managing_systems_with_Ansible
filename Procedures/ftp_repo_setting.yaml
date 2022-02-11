@@ -1,0 +1,20 @@
+---
+- name: Make directory
+  file:
+          path: /var/ftp/repo
+          state: directory
+- name: Download packages
+  yum:
+          name: nmap
+          download_only: yes
+          download_dir: /var/ftp/repo
+- name: Install createrepo package
+  yum:
+          name: createrepo_c
+          state: latest
+- name: Create the repo
+  command: createrepo /var/ftp/repo
+- name: Restart FTP service
+  service:
+          name: vsftpd
+          state: restarted

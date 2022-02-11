@@ -1,0 +1,5 @@
+[webservers]
+Centnode
+
+[dbservers]
+ubuntunode

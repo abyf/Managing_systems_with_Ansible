@@ -1,0 +1,49 @@
+---
+- name: add host to inventory
+  hosts: localhost
+  tasks:
+          - fail:
+                  msg: "add the options -e newhost=hostname -e newhostip=hostip"
+            when: (newhost is undefined) or (newhostip is undefined)
+          - name: Adding the new host to inventory
+            lineinfile:
+                    path: inventory
+                    state: present
+                    line: "{{ newhost }}"
+          - name: Adding the new host to /etc/hosts
+            lineinfile:
+                    path: /etc/hosts
+                    state: present
+                    line: "{{ newhostip }}  {{ newhost }}"
+  tags: addhost
+- name: Configure a new Rhel host
+  hosts: "{{ newhost }}" 
+  remote_user: root
+  become: false
+  tasks:
+          - name: configure user ansible
+            user:
+                    name: ansible
+                    groups: whee 
+                    ppend: yes
+                    state: present
+          - name: set a password for this user
+            shell: 'echo password | passwd --stdin ansible'
+          - name: enable sudo without passwords
+            lineinfile:
+                    path: /etc/sudoers
+                    regexp: '^%wheel'
+                    line: '%wheel ALL=(ALL) NOPASSWD'
+                    validate: /usr/sbin/visudo -cf %s
+          - name: create SSH directory in user ansible home
+            file:
+                    path: /home/ansible/.ssh
+                    state: directory
+                    owner: ansible
+                    group: ansible
+          - name: copy SSH key to remote host
+            copy:
+                    src: /home/ansible/.ssh/id_rsa.pub
+                    dest: /home/ansible/.ssh/authorized_keys
+  tags: setuphost
+                                  

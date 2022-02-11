@@ -1,0 +1,8 @@
+---
+- name: Setting up repo on the controler 
+  hosts: localhost
+  tasks:
+          - name: Setting up FTP on the controler
+            import_tasks: Procedures/ftp_config.yaml
+          - name: Setting up the FTP repo on the controler
+            import_tasks: Procedures/ftp_repo_setting.yaml
