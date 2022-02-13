@@ -1,0 +1,22 @@
+---
+- name: Create user accounts
+  hosts: Centnode
+  tasks:
+          - name: Create groups
+            group:
+                    name: "{{ item.groups }}"
+                    state: present
+            loop: "{{ users }}"        
+          - name: Create users 
+            user:
+                    name: "{{ item.username }}"
+                    group: "{{ item.groups}}"
+                    password: "{{ item.password }}"
+            loop: "{{ users }}"
+          - name: Allow group members in sudo
+            template:
+                    src: exercice131.j2
+                    dest: /etc/sudoers.d/sudogroups
+                    validate: 'visudo -cf %s'
+                    mode: 0440
+            loop: "{{ users }}"
