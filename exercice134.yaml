@@ -1,0 +1,57 @@
+---
+- name: Setting up local  Users
+  hosts: localhost
+  vars_files: vars/users
+  tasks:
+          - name: Creating groups on the localhost
+            group:
+                    name: "{{ item.group }}"
+                    state: present
+            loop: "{{ usern }}"
+          - name: creating authorised users on the localhost
+            user:
+                    name: "{{ item.name }}"
+                    state: present
+                    group: "{{ item.group }}"
+                    password: "{{ item.password }}"
+                    generate_ssh_key: true
+                    ssh_key_comment: "{{ item.name }}@{{ansible_fqdn}}"
+            loop: "{{ usern }}"
+          - name: Creating users' directories
+            file:
+                    name: "{{ item.name }}"
+                    state: directory
+            loop: "{{ usern }}"
+          - name: Copying users' ssh keys
+            shell: 'cat /home/{{item.name}}/.ssh/id_rsa.pub > {{item.name}}/id_rsa.pub'
+            loop: "{{ usern }}" 
+  tags:
+          - set_local
+
+- name: Setting up remote users
+  hosts: Centnode
+  tasks:
+          - name: creating groups on remote nodes
+            group:
+                    name: "{{ item.group }}"
+                    state: present
+            loop: "{{ usern }}"
+          - name: Creating remote users
+            user:
+                    name: "{{ item.name }}"
+                    state: present
+                    group: "{{ item.group}}"
+                    password: "{{ item.password }}"
+            loop: "{{ usern }}"
+          - name: Adding sudo privilege to specific group
+            copy:
+                    content: '%admins ALL=(ALL:ALL) NOPASSWD:ALL'
+                    dest: /etc/sudoers.d/admins  
+          - name: Setting up remote users passwordless authentication
+            authorized_key:
+                    user: "{{ item.name }}"
+                    key: "{{ lookup('file','./'+ item.name + '/id_rsa.pub') }}"
+            loop: "{{ usern }}" 
+  tags:
+          - set_remote
+

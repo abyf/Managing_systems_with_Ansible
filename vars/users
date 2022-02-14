@@ -1,17 +1,3 @@
-users:
-- username: zeina
-  password: zeina2022
-  groups: admins
-- username: marlet
-  password: marlet2022
-  groups: admins
-- username: victoria
-  password: victoria2022
-  groups: students
-- username: emma
-  password: emma2022
-  groups: students
-- username: radha
 usern:
 - name: sharon
   group: admins

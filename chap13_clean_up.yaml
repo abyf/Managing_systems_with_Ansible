@@ -1,0 +1,44 @@
+---
+- name: Removing added users on the localhost while working on CHAP13
+  hosts: localhost
+  become: yes
+  vars_files: vars/users
+  tasks:
+          - name: removing created groups
+            group:
+                    name: "{{ item.group}} "
+                    state: absent
+            loop: "{{ usern }}"
+          - name: removing created user
+            user:
+                    name: "{{ item.name }} "
+                    state: absent
+            loop: "{{ usern }}"
+          - name: removing created files
+            file:
+                    name: "{{ item.name }} "
+                    state: absent
+            loop: "{{ usern }}"
+  tags:
+          - clean_local
+- name: Removing added users on the managed nodes while working on CHAP13
+  hosts: Centnode
+  tasks:
+          - name: removing created users
+            user:
+                    name: "{{ item.name }}"
+                    state: absent
+            loop: "{{ usern }}"
+          - name: Deleting sudo file
+            file:
+                    path: /etc/sudoers.d/admins
+                    state: absent
+
+          - name: Removing created group
+            group:
+                    name: "{{ item.group }}"
+                    state: absent
+            loop: "{{ usern }}"
+  tags:
+          -clean_remote
+
