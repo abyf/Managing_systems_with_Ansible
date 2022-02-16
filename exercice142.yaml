@@ -1,0 +1,10 @@
+---
+- name: run a cron job
+  hosts: all
+  tasks:
+          - name: run a periodic job
+            cron:
+                    name: "run logger"
+                    minute: "0"
+                    hour: "6"
+                    job: "logger IT IS 6 AM"

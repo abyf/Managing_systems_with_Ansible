@@ -1,0 +1,73 @@
+---
+- name: Create storage
+  hosts: all
+  tasks:
+          - name: Creating a new partition
+            parted:
+                    name: files
+                    label: gpt
+                    device: /dev/sdb
+                    number: 1
+                    state: present
+                    part_start: 1MiB
+                    part_end: 1GiB
+            tags:
+                    - part_creation
+          - name: Creating another new partition
+            parted:
+                    name: swap
+                    label: gpt
+                    device: /dev/sdb
+                    number: 2
+                    state: present
+                    part_start: 1GiB
+                    part_end: 2GiB
+                    flags: [ lvm ]
+            tags:
+                    - part_creation
+          - name: Creating a volume group
+            lvg:
+                    vg: vgdata
+                    pesize: "8"
+                    pvs: /dev/sdb2
+            tags:
+                    - volgroup
+          - name: Creating a logical volume
+            lvol:
+                    lv: lvdata
+                    size: 512
+                    vg: vgdata
+            tags:
+                    - logivol
+          - name: Creating a file system
+            filesystem:
+                    dev: /dev/vgdata/lvdata
+                    fstype: xfs
+            tags:
+                    - filesys
+          - name: Creating the mounting point of the filesystem
+            file:
+                    path: /home/ansible/daddy
+                    state: directory
+            tags:
+                    - filesys
+          - name: Mounting the filesystem
+            mount:
+                    src: /dev/vgdata/lvdata
+                    fstype: xfs
+                    state: mounted
+                    path: /home/ansible/daddy
+            tags:
+                    - filesys
+          - name: Setting up the swap
+            block:
+                    - name: making the swap filesystem
+                      filesystem:
+                              fstype: swap
+                              dev: /dev/sdb1
+                    - name: Activating swap space
+                      command: swapon /dev/sdb1
+            when: ansible_swaptotal_mb < 256 
+            tags:
+                    - swaping
+

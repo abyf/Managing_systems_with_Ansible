@@ -1,0 +1,8 @@
+---
+- name: removing cron job
+  hosts: all
+  tasks:
+          - name: removing periodic job
+            cron:
+                    name: "run logger"
+                    state: absent

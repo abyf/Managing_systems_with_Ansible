@@ -1,0 +1,55 @@
+---
+- name: Setting up a storage solution
+  hosts: all
+  tasks:
+          - name: Searching and defining the require device
+            set_fact:
+                    diskname: sdb
+            when: ansible_facts['devices']['sdb']
+            ignore_errors: yes
+          - name: Stopping operations since the required device is not present
+            fail:
+                    msg: "DEVICE sdb NOT PRESENT"
+            when: diskname is not defined  
+          - name: Setting up a partition on {{diskname}} device
+            parted:
+                    device: /dev/sdb
+                    number: 1
+                    state: present 
+          - name: Setting up volume group on {{diskname}} device
+            lvg:
+                    pvs: /dev/sdb1
+                    vg: vgfiles
+                    state: present
+          - name: Settinp up the vgroup size on {{diskname}} device
+            set_fact:
+                    vgsize: "{{ansible_facts['lvm']['vgs']['vgfiles']['size_g'] | int}}"
+          - name: Showing the size of the volume group
+            debug:
+                    msg: The value of vgsize is {{vgsize}}          
+          - name: Creating an LVM on big volume groups on {{diskname}} device
+            lvol:
+                    vg: vgfiles
+                    lv: lvfiles
+                    size: 1.3g
+            when: vgsize | int > 1
+          - name: Creating an LVM on small volume groups on {{diskname}} device
+            lvol:
+                    vg: vgfiles
+                    lv: lvfiles
+                    size: 512m
+            when: vgsize | int < 1
+          - name: Formating the XFS filesystem
+            filesystem:
+                    dev: /dev/vgfiles/lvfiles
+                    fstype: xfs
+          - name: Mounting /dev/vgfiles/lvfiles
+            mount:
+                    path: /Beryl
+                    state: mounted
+                    src: /dev/vgfiles/lvfiles
+                    fstype: xfs
+
+          
+
+

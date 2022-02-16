@@ -1,0 +1,13 @@
+---
+- name: Task scheduling
+  hosts: all
+  tasks:
+          - name: Running a cron job on reboot
+            cron:
+                    name: "rebooting servers"
+                    job: "/usr/bin/shutdown -r"
+          - name: Showing boot success
+            debug:
+                    msg: Just rebooted 
+                    # - name: setting the default target 
+                    # - name: Showing the current version 
