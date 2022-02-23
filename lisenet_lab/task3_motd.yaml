@@ -1,0 +1,26 @@
+---
+- name: Setting up motd on proxy servers
+  become: yes
+  hosts: proxy
+  tasks:
+          - name: Updating the motd on proxy servers
+            copy:
+                    content: "Welcome to HAProxy server\n"
+                    dest: /etc/motd
+- name: Setting up motd on webservers servers
+  become: yes
+  hosts: webservers
+  tasks:
+          - name: Updating the motd on webservers servers
+            copy:
+                    content: "Welcome to Apache server\n"
+                    dest: /etc/motd
+- name: Setting up motd on database servers
+  become: yes
+  hosts: database
+  tasks:
+          - name: Updating the motd on database servers
+            copy:
+                    content: "Welcome to MYSQL server\n"
+                    dest: /etc/motd
+

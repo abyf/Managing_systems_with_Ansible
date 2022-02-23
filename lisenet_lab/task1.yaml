@@ -1,0 +1,14 @@
+---
+- name: Configuring Ansible on the localhost
+  hosts: localhost
+  become: yes
+  tasks:
+          - name: Installing Ansible
+            yum:
+                    name: ansible
+                    state: latest
+          - name: Setting up the automation user
+            user:
+                    name: automation
+                    state: present
+                    password: "get it from the adhoc passwod.sh command"

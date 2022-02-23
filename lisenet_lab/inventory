@@ -1,0 +1,8 @@
+[proxy]
+AdminServer1
+
+[webservers]
+WebServer1
+
+[database]
+DBServer1

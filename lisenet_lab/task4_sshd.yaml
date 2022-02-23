@@ -1,0 +1,15 @@
+---
+- name: Setting up the SSHD daemon on all servers
+  become: yes
+  hosts: all
+  vars:
+          - ban_val: '/etc/motd'
+          - X11_val: 'no'
+          - Max_val: '3'
+  tasks:
+          - name: SSHD daemon configuration
+            template:
+                    src: /home/automation/plays/sshd_config
+                    dest: /etc/ssh/sshd_config
+                    valide: /usr/sbin/sshd -f -t %s
+
